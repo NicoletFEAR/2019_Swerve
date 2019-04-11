@@ -7,6 +7,7 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.command.Command;
 import frc.robot.Robot;
 
@@ -26,8 +27,12 @@ public class OpenLoopSwerve extends Command {
   @Override
   protected void execute() {
 
+    if (Robot.oi.xbox1.getAButton()) {
+      Robot.swervy.FR.setMotorA(Robot.oi.getXbox1().getY(GenericHID.Hand.kLeft));
+      Robot.swervy.FR.setMotorA(Robot.oi.getXbox1().getY(GenericHID.Hand.kRight));
+    } else {
       Robot.swervy.convertDesiredWheelMotionToMotorOutputs(Robot.swervy.convertIntentToDesiredAnglesAndSpeeds(Robot.swervy.convertJoystickToIntentAxes()));
-
+    }
   }
 
   // Make this return true when this Command no longer needs to run execute()
