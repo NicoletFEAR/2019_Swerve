@@ -21,7 +21,9 @@ Manual control based on the two joysticks directly controlling the two motors if
 
 # Current Unknowns/Issues
 Problem: encoder is assumed to be positive clockwise\
- Solution: inside SwerveModule.java, put a negative in the getEncoderPos() method\
+  Solution: inside SwerveModule.java, put a negative in the getEncoderPos() method\
 Problem: both motors assumed to be positive clockwise\
- Solution: inside SwerveModule.java, put a negative in the setMotor_() method\
+  Solution: inside SwerveModule.java, put a negative in the setMotor_() method\
+Problem: encoder is assumed to be positive clockwise\
+  Solution: inside SwerveModule.java, put a negative in the getEncoderPos() method\
 
