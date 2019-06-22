@@ -173,7 +173,7 @@ public class SwerveSystem extends Subsystem {
     if (Math.abs(Robot.oi.getXbox1().getX(GenericHID.Hand.kLeft)) <= RobotMap.driveJoystickXDeadZone
         && Math.abs(Robot.oi.getXbox1().getY(GenericHID.Hand.kLeft)) <= RobotMap.driveJoystickYDeadZone
         && Math.abs(Robot.oi.getXbox1().getX(GenericHID.Hand.kRight)) <= RobotMap.driveJoystickZDeadZone) {
-      // You dopn't want the wheels to move when you don't want to move
+      // You don't want the wheels to move when you don't want to move
       desiredAnglesAndSpeeds[0] = 0.0;
       desiredAnglesAndSpeeds[1] = 0.0;
       desiredAnglesAndSpeeds[2] = 0.0;
@@ -195,6 +195,8 @@ public class SwerveSystem extends Subsystem {
     SmartDashboard.putNumber("BL_DA",desiredAnglesAndSpeeds[5]);
 
     return desiredAnglesAndSpeeds;
+
+    // Verified
 
   }
 
@@ -288,97 +290,94 @@ public class SwerveSystem extends Subsystem {
     System.out.println("inside convertDesiredWheelMotionToMotorOutputs");
 
     SmartDashboard.putNumber("FR_Encoder", FR.getEncoderPos());
-    SmartDashboard.putNumber("FL_Encoder", FL.getEncoderPos());
-    SmartDashboard.putNumber("BR_Encoder", BR.getEncoderPos());
+    SmartDashboard.putNumber("FL_Encoder", FL.getEncoderPos());    
     //SmartDashboard.putNumber("BL_Encoder", BL.getEncoderPos());
+    SmartDashboard.putNumber("BR_Encoder", BR.getEncoderPos());
 
     // FR MODULE ---------------------------------------------------------------------------------------
-    double angleDist_FR = calculateRotationToAngle(FR.getEncoderPos(), desiredAnglesAndSpeeds[1], 0);
-    double idealWheelSpeed_FR = desiredAnglesAndSpeeds[0];
-    if (!wheelIsFront[0]) { idealWheelSpeed_FR = -(idealWheelSpeed_FR); } 
-    double idealTurningSpeed_FR = 0;
-    double turnImportance_FR = 0;
+      double angleDist_FR = calculateRotationToAngle(FR.getEncoderPos(), desiredAnglesAndSpeeds[1], 0);
+      double idealWheelSpeed_FR = desiredAnglesAndSpeeds[0];
+      if (!wheelIsFront[0]) { idealWheelSpeed_FR = -(idealWheelSpeed_FR); } 
+      double idealTurningSpeed_FR = 0;
+      double turnImportance_FR = 0;
+      angleDist_FR = angleDist_FR / 90;
 
-    angleDist_FR = angleDist_FR / 90;
+      if (angleDist_FR >= 0) {
+        idealTurningSpeed_FR = (1 - ((angleDist_FR - 1) * (angleDist_FR - 1))); // (0,1)
+      } else {
+       idealTurningSpeed_FR = -(1 - ((-angleDist_FR - 1) * (-angleDist_FR - 1))); // (0,-1)
+      }
+      
+      turnImportance_FR = Math.abs(angleDist_FR) / 90;
+      turnImportance_FR = 1 - (turnImportance_FR - 1) * (turnImportance_FR - 1); // (0,1)
 
-    if (angleDist_FR >= 0) {
-      idealTurningSpeed_FR = (1 - ((angleDist_FR - 1) * (angleDist_FR - 1))); // (0,1)
-    } else {
-      idealTurningSpeed_FR = -(1 - ((-angleDist_FR - 1) * (-angleDist_FR - 1))); // (0,-1)
-    }
-
-    turnImportance_FR = Math.abs(angleDist_FR) / 90;
-    turnImportance_FR = 1 - (turnImportance_FR - 1) * (turnImportance_FR - 1); // (0,1)
-
-    double wheelSpeedAllowance_FR = 1 - turnImportance_FR; // (0,1)
+      double wheelSpeedAllowance_FR = 1 - turnImportance_FR; // (0,1)
     // END FR MODULE ----------------------------------------------------------------------------------
     
     // FL MODULE ---------------------------------------------------------------------------------------
-    double angleDist_FL = calculateRotationToAngle(FL.getEncoderPos(), desiredAnglesAndSpeeds[1], 0);
-    double idealWheelSpeed_FL = desiredAnglesAndSpeeds[0];
-    if (!wheelIsFront[1]) { idealWheelSpeed_FL = -(idealWheelSpeed_FL); } 
-    double idealTurningSpeed_FL = 0;
-    double turnImportance_FL = 0;
+      double angleDist_FL = calculateRotationToAngle(FL.getEncoderPos(), desiredAnglesAndSpeeds[1], 1);
+      double idealWheelSpeed_FL = desiredAnglesAndSpeeds[0];
+      if (!wheelIsFront[1]) { idealWheelSpeed_FL = -(idealWheelSpeed_FL); } 
+      double idealTurningSpeed_FL = 0;
+      double turnImportance_FL = 0;
 
-    angleDist_FL = angleDist_FL / 90;
+      angleDist_FL = angleDist_FL / 90;
 
-    if (angleDist_FL >= 0) {
-      idealTurningSpeed_FL = (1 - ((angleDist_FL - 1) * (angleDist_FL - 1))); // (0,1)
-    } else {
-      idealTurningSpeed_FL = -(1 - ((-angleDist_FL - 1) * (-angleDist_FL - 1))); // (0,-1)
-    }
+      if (angleDist_FL >= 0) {
+        idealTurningSpeed_FL = (1 - ((angleDist_FL - 1) * (angleDist_FL - 1))); // (0,1)
+      } else {
+        idealTurningSpeed_FL = -(1 - ((-angleDist_FL - 1) * (-angleDist_FL - 1))); // (0,-1)
+      }
 
-    turnImportance_FL = Math.abs(angleDist_FL) / 90;
-    turnImportance_FL = 1 - (turnImportance_FL - 1) * (turnImportance_FL - 1); // (0,1)
+      turnImportance_FL = Math.abs(angleDist_FL) / 90;
+      turnImportance_FL = 1 - (turnImportance_FL - 1) * (turnImportance_FL - 1); // (0,1)
 
-    double wheelSpeedAllowance_FL = 1 - turnImportance_FL; // (0,1)
+      double wheelSpeedAllowance_FL = 1 - turnImportance_FL; // (0,1)
     // END FL MODULE ----------------------------------------------------------------------------------
     
     /*
     // BL MODULE ---------------------------------------------------------------------------------------
-    double angleDist_BL = calculateRotationToAngle(BL.getEncoderPos(), desiredAnglesAndSpeeds[1], 0);
-    double idealWheelSpeed_BL = desiredAnglesAndSpeeds[0];
-    if (!wheelIsFront[2]) { idealWheelSpeed_BL = -(idealWheelSpeed_BL); }
-    double idealTurningSpeed_BL = 0;
-    double turnImportance_BL = 0;
+      double angleDist_BL = calculateRotationToAngle(BL.getEncoderPos(), desiredAnglesAndSpeeds[1], 2);
+      double idealWheelSpeed_BL = desiredAnglesAndSpeeds[0];
+      if (!wheelIsFront[2]) { idealWheelSpeed_BL = -(idealWheelSpeed_BL); }
+      double idealTurningSpeed_BL = 0;
+      double turnImportance_BL = 0;
 
-    angleDist_BL = angleDist_BL / 90;
+      angleDist_BL = angleDist_BL / 90;
 
-    if (angleDist_BL >= 0) {
-      idealTurningSpeed_BL = (1 - ((angleDist_BL - 1) * (angleDist_BL - 1))); // (0,1)
-    } else {
-      idealTurningSpeed_BL = -(1 - ((-angleDist_BL - 1) * (-angleDist_BL - 1))); // (0,-1)
-    }
+      if (angleDist_BL >= 0) {
+        idealTurningSpeed_BL = (1 - ((angleDist_BL - 1) * (angleDist_BL - 1))); // (0,1)
+      } else {
+        idealTurningSpeed_BL = -(1 - ((-angleDist_BL - 1) * (-angleDist_BL - 1))); // (0,-1)
+      }
 
-    turnImportance_BL = Math.abs(angleDist_BL) / 90;
-    turnImportance_BL = 1 - (turnImportance_BL - 1) * (turnImportance_BL - 1); // (0,1)
+      turnImportance_BL = Math.abs(angleDist_BL) / 90;
+      turnImportance_BL = 1 - (turnImportance_BL - 1) * (turnImportance_BL - 1); // (0,1)
 
-    double wheelSpeedAllowance_BL = 1 - turnImportance_BL; // (0,1)
+      double wheelSpeedAllowance_BL = 1 - turnImportance_BL; // (0,1)
     // END BL MODULE ----------------------------------------------------------------------------------
-
     */
+
     // BR MODULE ---------------------------------------------------------------------------------------
-    double angleDist_BR = calculateRotationToAngle(BR.getEncoderPos(), desiredAnglesAndSpeeds[1], 0);
-    double idealWheelSpeed_BR = desiredAnglesAndSpeeds[0];
-    if (!wheelIsFront[3]) { idealWheelSpeed_BR = -(idealWheelSpeed_BR); }
-    double idealTurningSpeed_BR = 0;
-    double turnImportance_BR = 0;
+      double angleDist_BR = calculateRotationToAngle(BR.getEncoderPos(), desiredAnglesAndSpeeds[1], 3);
+      double idealWheelSpeed_BR = desiredAnglesAndSpeeds[0];
+      if (!wheelIsFront[3]) { idealWheelSpeed_BR = -(idealWheelSpeed_BR); }
+      double idealTurningSpeed_BR = 0;
+      double turnImportance_BR = 0;
 
-    angleDist_BR = angleDist_BR / 90;
+      angleDist_BR = angleDist_BR / 90;
 
-    if (angleDist_BR >= 0) {
-      idealTurningSpeed_BR = (1 - ((angleDist_BR - 1) * (angleDist_BR - 1))); // (0,1)
-    } else {
-      idealTurningSpeed_BR = -(1 - ((-angleDist_BR - 1) * (-angleDist_BR - 1))); // (0,-1)
-    }
+      if (angleDist_BR >= 0) {
+        idealTurningSpeed_BR = (1 - ((angleDist_BR - 1) * (angleDist_BR - 1))); // (0,1)
+      } else {
+        idealTurningSpeed_BR = -(1 - ((-angleDist_BR - 1) * (-angleDist_BR - 1))); // (0,-1)
+      }
 
-    turnImportance_BR = Math.abs(angleDist_BR) / 90;
-    turnImportance_BR = 1 - (turnImportance_BR - 1) * (turnImportance_BR - 1); // (0,1)
+      turnImportance_BR = Math.abs(angleDist_BR) / 90;
+      turnImportance_BR = 1 - (turnImportance_BR - 1) * (turnImportance_BR - 1); // (0,1)
 
-    double wheelSpeedAllowance_BR = 1 - turnImportance_BR; // (0,1)
+      double wheelSpeedAllowance_BR = 1 - turnImportance_BR; // (0,1)
     // END BR MODULE ----------------------------------------------------------------------------------
-    
-
 
     double overallWheelSpeedAllowance = 1;
     if (overallWheelSpeedAllowance > wheelSpeedAllowance_FR) {

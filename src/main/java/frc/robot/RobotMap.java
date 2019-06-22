@@ -29,11 +29,11 @@ public class RobotMap {
     public static int frontLeftMotorA_ID = 20;
     public static int frontLeftMotorB_ID = 21;
 
-    public static int backRightMotorA_ID = 30;
-    public static int backRightMotorB_ID = 31;
+    public static int backLeftMotorA_ID = 30;
+    public static int backLeftMotorB_ID = 31;
 
-    public static int backLeftMotorA_ID = 40;
-    public static int backLeftMotorB_ID = 41;
+    public static int backRightMotorA_ID = 40;
+    public static int backRightMotorB_ID = 41;
 
     // JOYSTICK DEAD ZONES
     public static double driveJoystickXDeadZone = 0.1;
