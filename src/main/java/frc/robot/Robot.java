@@ -29,10 +29,9 @@ public class Robot extends TimedRobot {
   public static OI oi;
 
   // Susbsyetems here:
-
-
   public static SwerveSystem swervy = new SwerveSystem(); // makes a SwerveTrain out of our 4 modules
 
+  
   @Override
   public void robotInit() {
 
@@ -41,6 +40,7 @@ public class Robot extends TimedRobot {
 
 
     oi = new OI();
+    System.out.println("RobotInit");
     // OI must be constructed after subsystems. If the OI creates Commands
         // (which it very likely will), subsystems are not guaranteed to be
         // constructed yet. Thus, their requires() statements may grab null
@@ -58,6 +58,9 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotPeriodic() {
+    //System.out.println(swervy.FR.motorA.getSelectedSensorPosition());
+    
+
   }
 
   /**
@@ -94,6 +97,8 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void teleopPeriodic() {
+    Scheduler.getInstance().run();
+
   }
 
   /**

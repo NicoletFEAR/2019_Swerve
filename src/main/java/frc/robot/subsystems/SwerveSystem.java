@@ -40,25 +40,29 @@ public class SwerveSystem extends Subsystem {
     // Set the default command for a subsystem here.
     setDefaultCommand(new OpenLoopSwerve()); // sets the default command
     // to be our open swerve driving command
+    System.out.println("set SwerveSystem default command");
   }
 
   public SwerveSystem() { // makes a swerveSystem with four modules
     navX = new AHRS(SPI.Port.kMXP); // makes the new navX
     navX.reset(); // resets navX
 
-    this.isFieldOriented = (false);
+    this.isFieldOriented = false;
     SmartDashboard.putBoolean("isFieldOriented", isFieldOriented);
 
     this.FR = new SwerveModule(RobotMap.frontRightMotorA_ID, RobotMap.frontRightMotorB_ID);
     this.FL = new SwerveModule(RobotMap.frontLeftMotorA_ID, RobotMap.frontLeftMotorB_ID);
-    this.BL = new SwerveModule(RobotMap.backLeftMotorA_ID, RobotMap.backLeftMotorB_ID);
+    // this.BL = new SwerveModule(RobotMap.backLeftMotorA_ID, RobotMap.backLeftMotorB_ID);
     this.BR = new SwerveModule(RobotMap.backRightMotorA_ID, RobotMap.backRightMotorB_ID);
+
+    this.wheelIsFront = new boolean[4];
 
     this.wheelIsFront[0] = true;
     this.wheelIsFront[1] = true;
     this.wheelIsFront[2] = true;
     this.wheelIsFront[3] = true;
 
+    System.out.println("inside SwerveSystem");
   }
 
   public void switchControlModeOrientation() {
@@ -67,6 +71,8 @@ public class SwerveSystem extends Subsystem {
   }
 
   public double[] convertJoystickToIntentAxes() { // takes
+
+    System.out.println("inside convertJoystickToIntentAxes");
 
     double intentAxes[] = new double[3]; // makes an array of doubles to hold the 3 joystick axes, x, y, and r
 
@@ -79,22 +85,23 @@ public class SwerveSystem extends Subsystem {
     }
 
     // Y AXIS
-    if (Robot.oi.getXbox1().getY(GenericHID.Hand.kLeft) <= RobotMap.driveJoystickYDeadZone) {
+    if (Math.abs(Robot.oi.getXbox1().getY(GenericHID.Hand.kLeft)) <= RobotMap.driveJoystickYDeadZone) {
       // dead zone on the joystick so it does not move accidentaly
       intentAxes[1] = 0;
     } else {
-      intentAxes[1] = (Robot.oi.getXbox1().getY(GenericHID.Hand.kLeft));
+      intentAxes[1] = -(Robot.oi.getXbox1().getY(GenericHID.Hand.kLeft));
       // places axes 2 into index 1 of array (may have to invert y axis)
     }
 
     // ROTATION
-    if (Math.abs(Robot.oi.getXbox1().getY(GenericHID.Hand.kLeft)) <= RobotMap.driveJoystickZDeadZone) {
+    if (Math.abs(Robot.oi.getXbox1().getX(GenericHID.Hand.kRight)) <= RobotMap.driveJoystickZDeadZone) {
       // dead zone on the joystick so it does not move accidentaly
       intentAxes[2] = 0;
     } else {
       intentAxes[2] = Robot.oi.getXbox1().getX(GenericHID.Hand.kRight); // places axes 3 into index 2 of array
     }
 
+    /*
     // FIELD ORIENTED
     if (isFieldOriented) { // change the x and y so that forward is field oriented
 
@@ -112,16 +119,18 @@ public class SwerveSystem extends Subsystem {
       intentAxes[1] = Math.sin((Math.PI / 180) * NCombinedAngle) * NCombinedMag;
       intentAxes[0] = Math.cos((Math.PI / 180) * NCombinedAngle) * NCombinedMag;
 
-      SmartDashboard.putNumber("x", intentAxes[0]);
-      SmartDashboard.putNumber("y", intentAxes[1]);
+    } */
 
-    }
-
+    SmartDashboard.putNumber("x", intentAxes[0]);
+    SmartDashboard.putNumber("y", intentAxes[1]);
+    SmartDashboard.putNumber("z", intentAxes[2]);
+    
     return intentAxes; // return the three joystick axes
 
   }
 
   public double[] convertIntentToDesiredAnglesAndSpeeds(double[] intentAxes) {
+    System.out.println("inside convertIntentToDesiredAnglesAndSpeeds");
 
     double desiredAnglesAndSpeeds[] = new double[8];
     // makes an array of doubles to hold the 3 joystick axes, x, y, and r
@@ -150,16 +159,16 @@ public class SwerveSystem extends Subsystem {
     double backRightAngle = -180 * (Math.atan2(a, c) / Math.PI);
 
     desiredAnglesAndSpeeds[0] = frontRightSpeed;
-    desiredAnglesAndSpeeds[1] = frontRightAngle;
+    desiredAnglesAndSpeeds[1] = -frontRightAngle;
 
     desiredAnglesAndSpeeds[2] = frontLeftSpeed;
-    desiredAnglesAndSpeeds[3] = frontLeftAngle;
+    desiredAnglesAndSpeeds[3] = -frontLeftAngle;
 
     desiredAnglesAndSpeeds[4] = backLeftSpeed;
-    desiredAnglesAndSpeeds[5] = backLeftAngle;
+    desiredAnglesAndSpeeds[5] = -backLeftAngle;
 
     desiredAnglesAndSpeeds[6] = backRightSpeed;
-    desiredAnglesAndSpeeds[7] = backRightAngle;
+    desiredAnglesAndSpeeds[7] = -backRightAngle;
 
     if (Math.abs(Robot.oi.getXbox1().getX(GenericHID.Hand.kLeft)) <= RobotMap.driveJoystickXDeadZone
         && Math.abs(Robot.oi.getXbox1().getY(GenericHID.Hand.kLeft)) <= RobotMap.driveJoystickYDeadZone
@@ -175,11 +184,22 @@ public class SwerveSystem extends Subsystem {
       desiredAnglesAndSpeeds[7] = 0;
     }
 
+    SmartDashboard.putNumber("FR_DS",desiredAnglesAndSpeeds[0]);
+    SmartDashboard.putNumber("FL_DS",desiredAnglesAndSpeeds[2]);
+    SmartDashboard.putNumber("BR_DS",desiredAnglesAndSpeeds[6]);
+    SmartDashboard.putNumber("BL_DS",desiredAnglesAndSpeeds[4]);
+    
+    SmartDashboard.putNumber("FR_DA",desiredAnglesAndSpeeds[1]);
+    SmartDashboard.putNumber("FL_DA",desiredAnglesAndSpeeds[3]);
+    SmartDashboard.putNumber("BR_DA",desiredAnglesAndSpeeds[7]);
+    SmartDashboard.putNumber("BL_DA",desiredAnglesAndSpeeds[5]);
+
     return desiredAnglesAndSpeeds;
 
   }
 
   public double calculateRotationToAngle(double currentEncoderRaw, double desiredAngle, int whichModule) {
+    System.out.println("inside calculateRotationToAngle");
 
     double ticksPerHalfRot = 833.0;
 
@@ -265,6 +285,12 @@ public class SwerveSystem extends Subsystem {
   }
 
   public void convertDesiredWheelMotionToMotorOutputs(double[] desiredAnglesAndSpeeds) {
+    System.out.println("inside convertDesiredWheelMotionToMotorOutputs");
+
+    SmartDashboard.putNumber("FR_Encoder", FR.getEncoderPos());
+    SmartDashboard.putNumber("FL_Encoder", FL.getEncoderPos());
+    SmartDashboard.putNumber("BR_Encoder", BR.getEncoderPos());
+    //SmartDashboard.putNumber("BL_Encoder", BL.getEncoderPos());
 
     // FR MODULE ---------------------------------------------------------------------------------------
     double angleDist_FR = calculateRotationToAngle(FR.getEncoderPos(), desiredAnglesAndSpeeds[1], 0);
@@ -308,6 +334,7 @@ public class SwerveSystem extends Subsystem {
     double wheelSpeedAllowance_FL = 1 - turnImportance_FL; // (0,1)
     // END FL MODULE ----------------------------------------------------------------------------------
     
+    /*
     // BL MODULE ---------------------------------------------------------------------------------------
     double angleDist_BL = calculateRotationToAngle(BL.getEncoderPos(), desiredAnglesAndSpeeds[1], 0);
     double idealWheelSpeed_BL = desiredAnglesAndSpeeds[0];
@@ -329,6 +356,7 @@ public class SwerveSystem extends Subsystem {
     double wheelSpeedAllowance_BL = 1 - turnImportance_BL; // (0,1)
     // END BL MODULE ----------------------------------------------------------------------------------
 
+    */
     // BR MODULE ---------------------------------------------------------------------------------------
     double angleDist_BR = calculateRotationToAngle(BR.getEncoderPos(), desiredAnglesAndSpeeds[1], 0);
     double idealWheelSpeed_BR = desiredAnglesAndSpeeds[0];
@@ -349,6 +377,8 @@ public class SwerveSystem extends Subsystem {
 
     double wheelSpeedAllowance_BR = 1 - turnImportance_BR; // (0,1)
     // END BR MODULE ----------------------------------------------------------------------------------
+    
+
 
     double overallWheelSpeedAllowance = 1;
     if (overallWheelSpeedAllowance > wheelSpeedAllowance_FR) {
@@ -356,10 +386,10 @@ public class SwerveSystem extends Subsystem {
     }
     if (overallWheelSpeedAllowance > wheelSpeedAllowance_FL) {
       overallWheelSpeedAllowance = wheelSpeedAllowance_FL;
-    }
+    } /*
     if (overallWheelSpeedAllowance > wheelSpeedAllowance_BL) {
       overallWheelSpeedAllowance = wheelSpeedAllowance_BL;
-    }
+    } */
     if (overallWheelSpeedAllowance > wheelSpeedAllowance_BR) {
       overallWheelSpeedAllowance = wheelSpeedAllowance_BR;
     }
@@ -367,6 +397,10 @@ public class SwerveSystem extends Subsystem {
 
     // BEGIN FR MODULE ---------------------------------------------------------------------------------------
     double scaledWheelSpeed_FR = overallWheelSpeedAllowance * Math.abs(idealWheelSpeed_FR); // (0,1)
+
+    SmartDashboard.putNumber("FR_wheelSpeed", scaledWheelSpeed_FR);
+    SmartDashboard.putNumber("FR_turningSpeed", idealTurningSpeed_FR);
+
 
     if (Math.abs(idealTurningSpeed_FR) + scaledWheelSpeed_FR > 1) { // cant have that speed diff with that avg turning
       if (idealTurningSpeed_FR < 0) { // TURNS NEG
@@ -400,6 +434,9 @@ public class SwerveSystem extends Subsystem {
     // BEGIN FL MODULE ---------------------------------------------------------------------------------------
     double scaledWheelSpeed_FL = overallWheelSpeedAllowance * Math.abs(idealWheelSpeed_FL); // (0,1)
 
+    SmartDashboard.putNumber("FL_wheelSpeed", scaledWheelSpeed_FL);
+    SmartDashboard.putNumber("FL_turningSpeed", idealTurningSpeed_FL);
+
     if (Math.abs(idealTurningSpeed_FL) + scaledWheelSpeed_FL > 1) { // cant have that speed diff with that avg turning
       if (idealTurningSpeed_FL < 0) { // TURNS NEG
         if (idealWheelSpeed_FL > 0) { // wheel speed pos
@@ -429,8 +466,12 @@ public class SwerveSystem extends Subsystem {
     }
     // END FL MODULE ---------------------------------------------------------------------------------------
 
+    /*
     // BEGIN BL MODULE ---------------------------------------------------------------------------------------
     double scaledWheelSpeed_BL = overallWheelSpeedAllowance * Math.abs(idealWheelSpeed_BL); // (0,1)
+    
+    SmartDashboard.putNumber("BL_wheelSpeed", scaledWheelSpeed_BL);
+    SmartDashboard.putNumber("BL_turningSpeed", idealTurningSpeed_BL);
 
     if (Math.abs(idealTurningSpeed_BL) + scaledWheelSpeed_BL > 1) { // cant have that speed diff with that avg turning
       if (idealTurningSpeed_BL < 0) { // TURNS NEG
@@ -461,8 +502,14 @@ public class SwerveSystem extends Subsystem {
     }
     // END BL MODULE ---------------------------------------------------------------------------------------
 
+    */
+
     // BEGIN BR MODULE ---------------------------------------------------------------------------------------
     double scaledWheelSpeed_BR = overallWheelSpeedAllowance * Math.abs(idealWheelSpeed_BR); // (0,1)
+
+    
+    SmartDashboard.putNumber("BR_wheelSpeed", scaledWheelSpeed_BR);
+    SmartDashboard.putNumber("BR_turningSpeed", idealTurningSpeed_BR);
 
     if (Math.abs(idealTurningSpeed_BR) + scaledWheelSpeed_BR > 1) { // cant have that speed diff with that avg turning
       if (idealTurningSpeed_BR < 0) { // TURNS NEG

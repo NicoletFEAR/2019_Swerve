@@ -13,6 +13,7 @@ import com.ctre.phoenix.motorcontrol.SensorCollection;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
 import edu.wpi.first.wpilibj.command.Subsystem;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
  * Add your docs here.
@@ -24,7 +25,9 @@ public class SwerveModule extends Subsystem {
   // MOTORS:
   public TalonSRX motorA;
   public TalonSRX motorB;
-  public SensorCollection moduleEncoder;
+  public SensorCollection moduleEncoderA;
+  public SensorCollection moduleEncoderB;
+
 
   public boolean wheelIsFront;
 
@@ -41,13 +44,22 @@ public class SwerveModule extends Subsystem {
     this.motorB.setNeutralMode(NeutralMode.Coast);
     this.motorB.configClosedloopRamp(10);
 		
-		this.moduleEncoder = this.motorA.getSensorCollection();
-		
+		this.moduleEncoderA = this.motorA.getSensorCollection();
+    this.moduleEncoderB = this.motorA.getSensorCollection();
+
+    
 		//this.ModuleAnglePIDController = new ModuleAnglePID (this); // makes an angle PID controller for this ModuleDriver
-		this.moduleEncoder.setQuadraturePosition(0, 10);
-    	this.moduleEncoder.setQuadraturePosition(0, 10); // sets the encoder position to 0 when the ModuleDriver is first created
+		this.moduleEncoderA.setQuadraturePosition(0, 10);
+    	this.moduleEncoderA.setQuadraturePosition(0, 10); // sets the encoder position to 0 when the ModuleDriver is first created
     	// the second value is timeoutMS
-    	this.moduleEncoder.setQuadraturePosition(0, 10); // sets the encoder position to 0 when the ModuleDriver is first created
+      this.moduleEncoderA.setQuadraturePosition(0, 10); // sets the encoder position to 0 when the ModuleDriver is first created
+      
+    
+		//this.ModuleAnglePIDController = new ModuleAnglePID (this); // makes an angle PID controller for this ModuleDriver
+		this.moduleEncoderB.setQuadraturePosition(0, 10);
+    this.moduleEncoderB.setQuadraturePosition(0, 10); // sets the encoder position to 0 when the ModuleDriver is first created
+    // the second value is timeoutMS
+    this.moduleEncoderB.setQuadraturePosition(0, 10); // sets the encoder position to 0 when the ModuleDriver is first created
 	}
     
   
@@ -60,15 +72,15 @@ public class SwerveModule extends Subsystem {
   }
 
   public double getEncoderPos() {
-    return this.moduleEncoder.getQuadraturePosition();
+    return ( ( this.moduleEncoderA.getQuadraturePosition() + this.moduleEncoderB.getQuadraturePosition() ) / 2 );
   }
 
   public void setMotorA(double speed) {
-    this.motorA.set(ControlMode.PercentOutput, speed);
+    this.motorA.set(ControlMode.PercentOutput, -speed);
   }
 
   public void setMotorB(double speed) {
-    this.motorB.set(ControlMode.PercentOutput, speed);
+    this.motorB.set(ControlMode.PercentOutput, -speed);
   }
 
 }

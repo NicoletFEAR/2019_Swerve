@@ -21,6 +21,7 @@ public class OpenLoopSwerve extends Command {
   // Called just before this Command runs the first time
   @Override
   protected void initialize() {
+    System.out.println("inside OpenLoopSwerve.init");
   }
 
   // Called repeatedly when this Command is scheduled to run
@@ -28,9 +29,12 @@ public class OpenLoopSwerve extends Command {
   protected void execute() {
 
     if (Robot.oi.xbox1.getAButton()) {
+      System.out.println("A button pressed");
       Robot.swervy.FR.setMotorA(Robot.oi.getXbox1().getY(GenericHID.Hand.kLeft));
-      Robot.swervy.FR.setMotorA(Robot.oi.getXbox1().getY(GenericHID.Hand.kRight));
+      Robot.swervy.FR.setMotorB(Robot.oi.getXbox1().getY(GenericHID.Hand.kRight));
+      Robot.swervy.FR.getEncoderPos();
     } else {
+      System.out.println("A button not pressed");
       Robot.swervy.convertDesiredWheelMotionToMotorOutputs(Robot.swervy.convertIntentToDesiredAnglesAndSpeeds(Robot.swervy.convertJoystickToIntentAxes()));
     }
   }
