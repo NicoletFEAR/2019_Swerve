@@ -35,7 +35,13 @@ public class OpenLoopSwerve extends Command {
       Robot.swervy.FR.getEncoderPos();
     } else {
       System.out.println("A button not pressed");
-      Robot.swervy.convertDesiredWheelMotionToMotorOutputs(Robot.swervy.convertIntentToDesiredAnglesAndSpeeds(Robot.swervy.convertJoystickToIntentAxes()));
+
+      Robot.swervy.convertDesiredWheelMotionToMotorOutputs(
+        Robot.swervy.convertIntentToDesiredAnglesAndSpeeds(
+          Robot.swervy.convertJoystickToIntentAxes()
+        )
+      );
+      
     }
   }
 
